@@ -173,10 +173,11 @@ def parse_log(osg_test_log, test_exceptions, components):
             $''', re.MULTILINE | re.VERBOSE)
         # new syntax looks like "test_154_foo.py: test_01_startfoo comment"
         skip_regex_new = re.compile(r'''
-             (?P<module>\w+)\.py     # actual module name e.g. "test_154_foo"; ignore trailing .py
-             :\s*                    # colon and whitespace after .py file
-             (?P<function>\w+)       # e.g. "test_01_startfoo"
-             \s+(?P<comment>.*)      # comment (skip whitespace)
+            ^
+            (?P<module>\w+)\.py     # actual module name e.g. "test_154_foo"; ignore trailing .py
+            :\s*                    # colon and whitespace after .py file
+            (?P<function>\w+)       # e.g. "test_01_startfoo"
+            \s+(?P<comment>.*)      # comment (skip whitespace)
             $''', re.MULTILINE | re.VERBOSE)
         for n in itertools.chain(skip_regex_old.finditer(badskips_text),
                                  skip_regex_new.finditer(badskips_text)):
