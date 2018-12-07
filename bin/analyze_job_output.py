@@ -117,12 +117,12 @@ def parse_log(osg_test_log, test_exceptions, components):
               osgtest\.tests\.    # prefix of module
               (?P<module>\w+)     # actual module name e.g. "test_154_foo"
               \.                  # dot separating module and class
-              (?P<class_name>\w+)  # class name e.g. "TestStartFoo"
+              \w+                 # class name e.g. "TestStartFoo"; ignore this
           \)                      # closing paren
         )
         ''', re.MULTILINE | re.VERBOSE)
     for m in error_regex.finditer(osg_test_log):
-        status, function, module, class_name = m.group('status', 'function', 'module', 'class_name')
+        status, function, module = m.group('status', 'function', 'module')
         if module == 'special_cleanup':
             cleanup_failures += 1
         if test_exceptions:
@@ -131,7 +131,7 @@ def parse_log(osg_test_log, test_exceptions, components):
                 if status == 'FAIL' and ex_function == function and ex_module == module and \
                    today >= ex_start and today <= ex_finish:
                     ignored_failures += 1
-        problems.append('|'.join((module, function, class_name, status, '-')))
+        problems.append('|'.join((module, function, status, '-')))
 
     if ignored_failures and ignored_failures == len(problems) - cleanup_failures:
         # Runs consisting only of 'ignored' and 'cleanup' failures should be marked
@@ -156,16 +156,16 @@ def parse_log(osg_test_log, test_exceptions, components):
               osgtest\.tests\.    # prefix of module
               (?P<module>\w+)     # actual module name e.g. "test_154_foo"
               \.                  # dot separating module and class
-              (?P<class_name>\w+) # class name e.g. "TestStartFoo"
+              \w+                 # class name e.g. "TestStartFoo" (ignore this)
           \)                      # closing paren
           \s+(?P<comment>.*)      # comment (skip whitespace)
         )
         $''', re.MULTILINE | re.VERBOSE)
     if m is not None:
         for n in skip_regex.finditer(m.group(1)):
-            function, module, class_name, comment = n.group(
-                'function', 'module', 'class_name', 'comment')
-            problems.append('|'.join((module, function, class_name, 'SKIP', comment)))
+            function, module, comment = n.group(
+                'function', 'module', 'comment')
+            problems.append('|'.join((module, function, 'SKIP', comment)))
     if not problems:
         run_status = 'pass'
     elif not run_status: # catch missed failures
