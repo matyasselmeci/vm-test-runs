@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import itertools
 import glob
 import os
 import re
@@ -106,22 +107,30 @@ def parse_log(osg_test_log, test_exceptions, components):
     problems = []
     ignored_failures = 0
     cleanup_failures = 0
-    error_regex = re.compile(r'''
+    # old syntax looks like "ERROR: test_01_startfoo (osgtest.tests.test_154_foo.TestStartFoo)"
+    error_regex1 = re.compile(r'''
         ^
-        (?:
-          # old syntax looks like "ERROR: test_01_startfoo (osgtest.tests.test_154_foo.TestStartFoo)"
-          (?P<status>ERROR|FAIL)
-          :\s*                    # colon and whitespace after ERROR or FAIL
-          (?P<function>\w+)       # e.g. "test_01_startfoo"
-          \s+\(                   # space and opening paren before module and class
-              osgtest\.tests\.    # prefix of module
-              (?P<module>\w+)     # actual module name e.g. "test_154_foo"
-              \.                  # dot separating module and class
-              \w+                 # class name e.g. "TestStartFoo"; ignore this
-          \)                      # closing paren
-        )
+        (?P<status>ERROR|FAIL)
+        :\s*                    # colon and whitespace after ERROR or FAIL
+        (?P<function>\w+)       # e.g. "test_01_startfoo"
+        \s+\(                   # space and opening paren before module and class
+            osgtest\.tests\.    # prefix of module
+            (?P<module>\w+)     # actual module name e.g. "test_154_foo"
+            \.                  # dot separating module and class
+            \w+                 # class name e.g. "TestStartFoo"; ignore this
+        \)                      # closing paren
         ''', re.MULTILINE | re.VERBOSE)
-    for m in error_regex.finditer(osg_test_log):
+    # new syntax looks like "ERROR: test_154_foo.py: test_01_startfoo"
+    error_regex2 = re.compile(r'''
+        ^
+        (?P<status>ERROR|FAIL)
+        :\s*                    # colon and whitespace after ERROR or FAIL
+        (?P<module>\w+)\.py     # actual module name e.g. "test_154_foo"; ignore trailing .py
+        :\s*                    # colon and whitespace after .py file
+        (?P<function>\w+)       # e.g. "test_01_startfoo"
+        ''', re.MULTILINE | re.VERBOSE)
+    for m in itertools.chain(error_regex1.finditer(osg_test_log),
+                             error_regex2.finditer(osg_test_log)):
         status, function, module = m.group('status', 'function', 'module')
         if module == 'special_cleanup':
             cleanup_failures += 1
@@ -147,22 +156,28 @@ def parse_log(osg_test_log, test_exceptions, components):
         run_status = 'install'
 
     m = re.search(r'^=+\nBAD SKIPS:\n-+\n(.*?)\n\n', osg_test_log, re.MULTILINE | re.DOTALL)
-    skip_regex = re.compile(r'''
+    # old syntax looks like "test_01_startfoo (osgtest.tests.test_154_foo.TestStartFoo) comment"
+    skip_regex1 = re.compile(r'''
         ^
-        (?:
-          # old syntax looks like "test_01_startfoo (osgtest.tests.test_154_foo.TestStartFoo) comment"
-          (?P<function>\w+)       # e.g. "test_01_startfoo"
-          \s+\(                   # space and opening paren before module and class
-              osgtest\.tests\.    # prefix of module
-              (?P<module>\w+)     # actual module name e.g. "test_154_foo"
-              \.                  # dot separating module and class
-              \w+                 # class name e.g. "TestStartFoo" (ignore this)
-          \)                      # closing paren
-          \s+(?P<comment>.*)      # comment (skip whitespace)
-        )
+        (?P<function>\w+)       # e.g. "test_01_startfoo"
+        \s+\(                   # space and opening paren before module and class
+            osgtest\.tests\.    # prefix of module
+            (?P<module>\w+)     # actual module name e.g. "test_154_foo"
+            \.                  # dot separating module and class
+            \w+                 # class name e.g. "TestStartFoo" (ignore this)
+        \)                      # closing paren
+        \s+(?P<comment>.*)      # comment (skip whitespace)
+        $''', re.MULTILINE | re.VERBOSE)
+    # new syntax looks like "test_154_foo.py: test_01_startfoo comment"
+    skip_regex2 = re.compile(r'''
+         (?P<module>\w+)\.py     # actual module name e.g. "test_154_foo"; ignore trailing .py
+         :\s*                    # colon and whitespace after .py file
+         (?P<function>\w+)       # e.g. "test_01_startfoo"
+         \s+(?P<comment>.*)      # comment (skip whitespace)
         $''', re.MULTILINE | re.VERBOSE)
     if m is not None:
-        for n in skip_regex.finditer(m.group(1)):
+        for n in itertools.chain(skip_regex1.finditer(m.group(1)),
+                                 skip_regex2.finditer(m.group(1))):
             function, module, comment = n.group(
                 'function', 'module', 'comment')
             problems.append('|'.join((module, function, 'SKIP', comment)))
@@ -172,29 +187,34 @@ def parse_log(osg_test_log, test_exceptions, components):
         run_status = 'fail'
 
     okskips = {}
-    okskip_regex = re.compile(r'''
-        (?:
-          # old syntax looks like "some text (osgtest.tests.test_154_foo.TestStartFoo) ... okskip"
-          # we only want to capture "test_154_foo"
-          \S+\s                   # text to ignore (must end in space)
-          \(osgtest\.tests\.      # literal text (open paren followed by prefix of module)
-          (?P<module>[^\.]+)      # module name
-          .*                      # more text to ignore
-          okskip                  # literal text
-        )
+    # old syntax looks like "some text (osgtest.tests.test_154_foo.TestStartFoo) ... okskip"
+    # we only want to capture "test_154_foo"
+    okskip_regex1 = re.compile(r'''
+        \S+\s                   # text to ignore (must end in space)
+        \(osgtest\.tests\.      # literal text (open paren followed by prefix of module)
+        (?P<module>[^\.]+)      # module name
+        .*                      # more text to ignore
+        okskip                  # literal text
         $''', re.MULTILINE | re.VERBOSE)
-    m = okskip_regex.finditer(osg_test_log)
-    if m:
-        for module in m:
-            try:
-                tags = components[module.group(1)]
-            except KeyError:
-                continue
-            try:
-                for tag in tags:
-                    okskips[tag] += 1
-            except KeyError:
-                okskips[tag] = 1
+    # new syntax looks like "test_154_foo.py: test_01_startfoo ... okskip"
+    # we only want to capture "test_154_foo"
+    okskip_regex2 = re.compile(r'''
+        (?P<module>\w+?)\.py:   # module name; ignore trailing .py
+        .+?                     # ignore a bunch of text
+        okskip                  # make sure it ends in okskip
+        $''', re.MULTILINE | re.VERBOSE)
+    matches = itertools.chain(okskip_regex1.finditer(osg_test_log),
+                              okskip_regex2.finditer(osg_test_log))
+    for m in matches:
+        try:
+            tags = components[m.group('module')]
+        except KeyError:
+            continue
+        try:
+            for tag in tags:
+                okskips[tag] += 1
+        except KeyError:
+            okskips[tag] = 1
 
     if re.search('AssertionError: Retries terminated after timeout period', osg_test_log, re.MULTILINE):
         run_status += ' yum_timeout'
