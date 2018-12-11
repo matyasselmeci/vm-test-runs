@@ -178,7 +178,15 @@ def generate_cell(run):
             mouseover_text += '</br><b>Failures:</b>'
             for test in run['tests_messages']:
                 module, function, status, msg = test.split('|')
-                mouseover_text += '</br><b>&emsp;%s</b> %s (%s): %s' % (status, module, function, msg)
+                m = re.match(r'test_(\d+)_(\S+)$', module)
+                if m:
+                    modulestr = "%s.%s" % m.groups()
+                else:
+                    modulestr = module
+                if msg and msg != '-':
+                    mouseover_text += '</br><b>&emsp;%s</b> %s (%s): %s' % (status, modulestr, function, msg)
+                else:
+                    mouseover_text += '</br><b>&emsp;%s</b> %s (%s)' % (status, modulestr, function)
         elif run['osg_test_status'] == 'timeout':
             mouseover_text += '</br><b>Timeout Test</b>: %s' % run['timeout_test']
 
