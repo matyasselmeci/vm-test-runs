@@ -177,14 +177,8 @@ def generate_cell(run):
         if run['tests_messages']:
             mouseover_text += '</br><b>Failures:</b>'
             for test in run['tests_messages']:
-                filename, test, module, status, msg = test.split('|')
-                try:
-                    module_num = re.match(r'test_(\d+).*', filename).group(1) + '.'
-                except AttributeError: # account for failures in special tests
-                    module_num = ''
-                short_module = module_num + re.sub(r'^Test', '', module)
-                short_test = re.match(r'test_(.*)', test).group(1)
-                mouseover_text += '</br><b>&emsp;%s</b> %s (%s): %s' % (status, short_module, short_test, msg)
+                module, function, status, msg = test.split('|')
+                mouseover_text += '</br><b>&emsp;%s</b> %s (%s): %s' % (status, module, function, msg)
         elif run['osg_test_status'] == 'timeout':
             mouseover_text += '</br><b>Timeout Test</b>: %s' % run['timeout_test']
 
