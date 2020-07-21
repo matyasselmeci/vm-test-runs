@@ -10,11 +10,11 @@ import vmu
 # E-mail recipient list constructed from select Software and Release Team members:
 # https://opensciencegrid.github.io/technology/
 RECIPIENTS = (
-    'Brian Lin <blin@cs.wisc.edu>',
-    'Diego Davila <didavila@ucsd.edu>',
+#    'Brian Lin <blin@cs.wisc.edu>',
+#    'Diego Davila <didavila@ucsd.edu>',
     'Mat Selmeci <matyas@cs.wisc.edu>',
-    'Matt Westphall <westphall@wisc.edu>',
-    'Tim Theisen <tim@cs.wisc.edu>'
+#    'Matt Westphall <westphall@wisc.edu>',
+#    'Tim Theisen <tim@cs.wisc.edu>'
     )
 
 ANALYSIS_FILENAME = 'analyze-test-run.out'
