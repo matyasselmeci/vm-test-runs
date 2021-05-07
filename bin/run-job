@@ -1,5 +1,7 @@
 #!/bin/sh
 
+PS4='+ ${LINENO}: '
+set -x
 MOUNT_DIR=/mnt/user
 INPUT_DIR=$MOUNT_DIR/input
 OUTPUT_DIR=$MOUNT_DIR/output
