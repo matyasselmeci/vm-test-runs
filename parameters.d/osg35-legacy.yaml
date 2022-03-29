@@ -1,5 +1,5 @@
 ###################
-# OSG 3.5 tests
+# OSG 3.5 tests that require installing from 3.5 main without upcoming
 # File format documention:
 # https://github.com/opensciencegrid/vm-test-runs#running-osg-test-in-vm-universe
 ###################
@@ -17,10 +17,13 @@ sources:
   # 3.3-testing and 3-3-upcoming-testing:
   # 3.2; osg, osg-testing > 3.3/osg-testing, osg-upcoming-testing
   ###################
-  - opensciencegrid:master; 3.5; osg, osg-upcoming
-  - opensciencegrid:master; 3.5; osg, osg-upcoming, epel-testing
-  - opensciencegrid:master; 3.5; osg-rolling, osg-upcoming-rolling
-  - opensciencegrid:master; 3.5; osg-testing, osg-upcoming-testing
+  - opensciencegrid:master; 3.5; osg
+  - opensciencegrid:master; 3.5; osg, epel-testing
+  - opensciencegrid:master; 3.5; osg-rolling
+  - opensciencegrid:master; 3.5; osg-testing
+  - opensciencegrid:master; 3.5; osg > osg-testing
+  - opensciencegrid:master; 3.4; osg > 3.5/osg
+  - opensciencegrid:master; 3.5; osg > osg-testing, osg-upcoming-testing
 
 package_sets:
   #### Required ####
@@ -51,19 +54,6 @@ package_sets:
       - htcondor-ce-collector
       - htcondor-ce-view
       - fetch-crl
-  - label: Worker Node
-    packages:
-      - osg-wn-client
-      - osg-oasis
-      - singularity
-  - label: StashCache
-    packages:
-      - stashcache-client
-      - stash-cache
-      - stash-origin
-      - globus-proxy-utils
-      - python3-gfal2-util
-      - gfal2-all
   - label: XRootD
     packages:
       - osg-xrootd-standalone
@@ -81,16 +71,6 @@ package_sets:
       - globus-gass-copy-progs
       - uberftp
       - globus-proxy-utils  # proxy required for all transfer tests
-  - label: HDFS Plugins
-    packages:
-      - osg-gridftp-hdfs
-      - globus-gass-copy-progs
-      - gfal2-plugin-gridftp
-      - python3-gfal2-util
-      - gfal2-plugin-file
-      - lcmaps-db-templates
-      - vo-client-lcmaps-voms
-      - globus-proxy-utils # proxy required for all transfer tests
   - label: GSI OpenSSH
     packages:
       - gsi-openssh-server
