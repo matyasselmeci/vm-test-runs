@@ -41,16 +41,6 @@ package_sets:
     packages:
       - osg-ce-condor
       - htcondor-ce-view
-      - torque-server
-      - torque-mom
-      - torque-client
-      - torque-scheduler
-      - slurm
-      - slurm-slurmd
-      - slurm-slurmctld
-      - slurm-perlapi
-      - slurm-slurmdbd
-      - mariadb-server
   - label: Compute Entrypoint (Slurm Batch Sys)
     packages:
       - osg-ce-slurm
