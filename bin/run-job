@@ -193,6 +193,7 @@ fi
 
 # Run osg-test
 rpm --query --all > $OUTPUT_DIR/rpm-qa-start.log 2>&1
+yum-config-manager --disable osg
 osg-test --config=$MOUNT_DIR/input/osg-test.conf > $OUTPUT_DIR/osg-test-`date '+%Y%m%d'`.log 2>&1
 rpm --query --all > $OUTPUT_DIR/rpm-qa-final.log 2>&1
 
