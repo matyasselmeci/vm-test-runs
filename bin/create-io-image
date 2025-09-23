@@ -7,7 +7,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import time
 import vmu
 
 from typing import Dict
@@ -132,13 +131,6 @@ def create_image(config_filename):
         print(stdout)
         if stderr:
             print(stderr, file=sys.stderr)
-
-        sentinel = os.path.join(image_directory, "ok-you-can-continue")
-        print(f"DEBUGGING... sleeping until {sentinel} is created or one hour")
-        for _ in range(3600):
-            if os.path.exists(sentinel):
-                break
-            time.sleep(60)
 
         shutil.rmtree(image_directory)
 
