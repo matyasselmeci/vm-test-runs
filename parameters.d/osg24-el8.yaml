@@ -83,5 +83,9 @@ package_sets:
     packages:
       - htvault-config
       - htgettoken
-
-
+  - label: OSDF-Cache
+    packages:
+      - osdf-cache
+  - label: OSDF-Origin
+    packages:
+      - osdf-origin
