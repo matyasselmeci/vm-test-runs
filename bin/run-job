@@ -97,11 +97,11 @@ log_command rm -f /var/lib/NetworkManager/*.lease
 log_command systemctl start NetworkManager
 sleep 2
 log_command systemctl is-active NetworkManager
-sleep 43
-journalctl -u NetworkManager --lines 50
-ls -l /var/lib/NetworkManager/
-# ls -l /var/lib/dhclient/
-ip addr show  # show again post-restart
+sleep 45
+log_command journalctl -u NetworkManager --lines 50 --no-pager --no-hostname
+log_command ls -l /var/lib/NetworkManager/
+# ls -l /var/lib/dhclient/  # doesn't exist - no dhclient
+log_command ip addr show  # show again post-restart
 
 # Set a hostname
 if [[ -n `ip addr | grep eth0` ]]; then
