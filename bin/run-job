@@ -122,6 +122,8 @@ log_command hostname
 log_command hostname osg-test.localdomain
 log_command hostname
 
+echo 'nameserver 1.1.1.1' > /etc/resolv.conf
+
 # Do initial check of gethostbyname()
 # log_command yum -y install strace
 # log_command strace -s 8192 -v $INPUT_DIR/check-hostname osg-test.localdomain
