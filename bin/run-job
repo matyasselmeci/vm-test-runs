@@ -89,21 +89,26 @@ log_command printenv
 log_command mount
 log_command cat /proc/net/dev
 
+# Nuke stale NetworkManager profiles
+log_command rm -f /etc/NetworkManager/system-connections/*
+systemctl restart NetworkManager
+sleep 2
+log_command systemctl status NetworkManager
+ls -l /var/lib/NetworkManager/
+ls -l /var/lib/dhclient/
+
 # Set a hostname
 if [[ -n `ip addr | grep eth0` ]]; then
     ip_address=`ip addr show eth0 | awk 'match($0, /inet ([0-9.]+)/, a) { print a[1] }'`
 elif [[ -n `ip addr | grep ens3` ]]; then
-    # disable checksum offloading (whatever that is)
-    log_command ethtool -K ens3 rx off tx off sg off tso off gso off gro off
-    log_command dhclient -v ens3
     ip_address=`ip addr show ens3 | awk 'match($0, /inet ([0-9.]+)/, a) { print a[1] }'`
-    log_command ip route
 elif [[ -n `ip addr | grep enp1s0` ]]; then
     ip_address=`ip addr show enp1s0 | awk 'match($0, /inet ([0-9.]+)/, a) { print a[1] }'`
 else
     echo 'Could not find IP address'
     exit 1
 fi
+log_command ip route
 echo "$ip_address osg-test.localdomain osg-test" >> /etc/hosts
 log_command cat /etc/hosts
 log_command cat /etc/host.conf
