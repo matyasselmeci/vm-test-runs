@@ -93,7 +93,11 @@ log_command cat /proc/net/dev
 if [[ -n `ip addr | grep eth0` ]]; then
     ip_address=`ip addr show eth0 | awk 'match($0, /inet ([0-9.]+)/, a) { print a[1] }'`
 elif [[ -n `ip addr | grep ens3` ]]; then
+    # disable checksum offloading (whatever that is)
+    log_command ethtool -K ens3 rx off tx off sg off tso off gso off gro off
+    log_command dhclient -v ens3
     ip_address=`ip addr show ens3 | awk 'match($0, /inet ([0-9.]+)/, a) { print a[1] }'`
+    log_command ip route
 elif [[ -n `ip addr | grep enp1s0` ]]; then
     ip_address=`ip addr show enp1s0 | awk 'match($0, /inet ([0-9.]+)/, a) { print a[1] }'`
 else
