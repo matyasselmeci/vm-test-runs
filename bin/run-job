@@ -84,18 +84,21 @@ log_command cat /etc/creation_date
 log_command cat /etc/redhat-release
 log_command uname -m
 log_command echo $os_major_version
-log_command ip addr show
 log_command printenv
 log_command mount
 log_command cat /proc/net/dev
 
 # Nuke stale NetworkManager profiles and leases
+log_command ip addr show
 log_command systemctl stop NetworkManager
+sleep 2
 log_command rm -f /etc/NetworkManager/system-connections/*
 log_command rm -f /var/lib/NetworkManager/*.lease
 log_command systemctl start NetworkManager
 sleep 2
-log_command systemctl status NetworkManager
+log_command systemctl is-active NetworkManager
+sleep 43
+journalctl -u NetworkManager --lines 50
 ls -l /var/lib/NetworkManager/
 # ls -l /var/lib/dhclient/
 ip addr show  # show again post-restart
