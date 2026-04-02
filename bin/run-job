@@ -89,13 +89,16 @@ log_command printenv
 log_command mount
 log_command cat /proc/net/dev
 
-# Nuke stale NetworkManager profiles
+# Nuke stale NetworkManager profiles and leases
+log_command systemctl stop NetworkManager
 log_command rm -f /etc/NetworkManager/system-connections/*
-systemctl restart NetworkManager
+log_command rm -f /var/lib/NetworkManager/*.lease
+log_command systemctl start NetworkManager
 sleep 2
 log_command systemctl status NetworkManager
 ls -l /var/lib/NetworkManager/
-ls -l /var/lib/dhclient/
+# ls -l /var/lib/dhclient/
+ip addr show  # show again post-restart
 
 # Set a hostname
 if [[ -n `ip addr | grep eth0` ]]; then
