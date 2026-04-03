@@ -92,6 +92,21 @@ log_command cat /proc/net/dev
 log_command ip addr show
 log_command systemctl stop NetworkManager
 sleep 2
+
+ls -l /usr/sbin/ethtool
+# Disable checksum offloading... whatever that is
+cat > /etc/NetworkManager/dispatcher.d/10-disable-offload <<'EOF'
+#!/bin/bash
+IFACE="$1"
+STATE="$2"
+
+if [ "$STATE" = "up" ]; then
+  /usr/sbin/ethtool -K "$IFACE" rx off tx off sg off tso off gso off gro off
+fi
+EOF
+
+chmod +x /etc/NetworkManager/dispatcher.d/10-disable-offload
+
 log_command rm -f /etc/NetworkManager/system-connections/*
 log_command rm -f /var/lib/NetworkManager/*.lease
 log_command systemctl start NetworkManager
