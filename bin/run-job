@@ -136,16 +136,16 @@ log_command cat /proc/net/dev
 #     exit 1
 # fi
 # echo "$ip_address osg-test.localdomain osg-test" >> /etc/hosts
-add_addresses_to_etc_hosts
+# add_addresses_to_etc_hosts
 log_command cat /etc/hosts
 log_command cat /etc/host.conf
 log_command hostname
-if command -v hostnamectl &>/dev/null; then
-    log_command hostnamectl set-hostname osg-test.localdomain
-else
-    log_command hostname osg-test.localdomain
-fi
-log_command hostname
+# if command -v hostnamectl &>/dev/null; then
+#     log_command hostnamectl set-hostname osg-test.localdomain
+# else
+#     log_command hostname osg-test.localdomain
+# fi
+# log_command hostname
 
 # Do initial check of gethostbyname()
 # log_command yum -y install strace
