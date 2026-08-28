@@ -116,7 +116,7 @@ log_command hostname
 # affect the tests, may be big, and don't take effect until a reboot anyway.
 if [[ $os_major_version -gt 7 ]]; then
     # Ignore el7 - it's on its way out anyway.
-    run_command_with_retries 8 dnf install -y dnf-plugins-core
+    run_command_with_retries 8 dnf install -y 'dnf-command(versionlock)'
     log_command dnf versionlock add "*kernel*"
     log_command dnf versionlock add "*firmware*"
     log_command dnf versionlock add "*systemd*"
