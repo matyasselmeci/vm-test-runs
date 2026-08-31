@@ -119,7 +119,6 @@ if [[ $os_major_version -gt 7 ]]; then
     run_command_with_retries 8 dnf install -y 'dnf-command(versionlock)'
     log_command dnf versionlock add "*kernel*"
     log_command dnf versionlock add "*firmware*"
-    log_command dnf versionlock add "*systemd*"
 fi
 
 # Do initial check of gethostbyname()
